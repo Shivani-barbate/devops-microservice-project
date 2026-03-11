@@ -1,0 +1,19 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# Terraform lock
+.terraform.lock.hcl
+
+# binaries
+minikube-linux-amd64
+
+# OS files
+.DS_Store
+
+# logs
+*.log
+
+# python cache
+__pycache__/

@@ -1,0 +1,19 @@
+name: DevOps Pipeline
+
+on:
+ push:
+   branches: [dev, uat, main]
+
+jobs:
+
+ build:
+   runs-on: ubuntu-latest
+
+   steps:
+   - uses: actions/checkout@v3
+
+   - name: Build Docker Image
+     run: docker build -t devops-app .
+
+   - name: Deploy
+     run: kubectl apply -f k8s/
