@@ -1,19 +1,38 @@
 name: DevOps Pipeline
 
 on:
- push:
-   branches: [dev, uat, main]
+  push:
+    branches:
+      - main
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
 
- build:
-   runs-on: ubuntu-latest
+    steps:
 
-   steps:
-   - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-   - name: Build Docker Image
-     run: docker build -t devops-app .
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
 
-   - name: Deploy
-     run: kubectl apply -f k8s/
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build Docker image
+      run: |
+        docker build -t devops-app -f docker/Dockerfile .
+
+    - name: Tag image
+      run: |
+        docker tag devops-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/devops-app:latest
+
+    - name: Push image to ECR
+      run: |
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/devops-app:latest
